@@ -10,6 +10,7 @@ const game = {
   platform: null,
   ball: null,
   blocks: [],
+  score: 0,
   rows: 4,
   cols: 8,
   width: 640,
@@ -72,10 +73,17 @@ const game = {
     this.platform.move();
     this.ball.move();
   },
+  addScore() {
+    ++this.score;
+    if (this.score >= this.blocks.length) {
+      this.end("You win!");
+    }
+  },
   collideBlocks() {
     for (let block of this.blocks) {
       if (block.active && this.ball.collide(block)) {
         this.ball.bumpBlock(block);
+        this.addScore();
       }
     }
   },
@@ -123,6 +131,11 @@ const game = {
       this.create();
       this.run();
     });
+  },
+  end(message) {
+    game.running = false;
+    alert(message);
+    window.location.reload();
   },
   random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -188,9 +201,7 @@ game.ball = {
       this.y = 0;
       this.dy = this.velocity;
     } else if (ballBottom > worldBottom) {
-      game.running = false;
-      alert("You lose!");
-      window.location.reload();
+      game.end("You lose!");
     }
   },
   bumpBlock(block) {
