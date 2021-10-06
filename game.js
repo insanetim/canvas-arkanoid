@@ -67,6 +67,7 @@ const game = {
     this.collideBlocks();
     this.collidePlatform();
     this.ball.collideWorldBounds();
+    this.platform.collideWorldBounds();
     this.platform.move();
     this.ball.move();
   },
@@ -165,9 +166,9 @@ game.ball = {
     let y = this.y + this.dy;
 
     let ballLeft = x;
-    let ballRight = x + this.width;
+    let ballRight = ballLeft + this.width;
     let ballTop = y;
-    let ballBottom = y + this.height;
+    let ballBottom = ballTop + this.height;
 
     let worldLeft = 0;
     let worldRight = game.width;
@@ -192,6 +193,9 @@ game.ball = {
     block.active = false;
   },
   bumpPlatform(platform) {
+    if (platform.dx) {
+      this.x += platform.dx;
+    }
     if (this.dy > 0) {
       this.dy = -this.velocity;
       let touchX = this.x + this.width / 2;
@@ -237,6 +241,23 @@ game.platform = {
     let offset = this.width - diff;
     let result = (2 * offset) / this.width;
     return result - 1;
+  },
+  collideWorldBounds() {
+    let x = this.x + this.dx;
+
+    let platformLeft = x;
+    let platformRight = platformLeft + this.width;
+
+    let worldLeft = 0;
+    let worldRight = game.width;
+
+    if (platformLeft < worldLeft) {
+      this.x = 0;
+      this.dx = 0;
+    } else if (platformRight > worldRight) {
+      this.x = game.width - this.width;
+      this.dx = 0;
+    }
   },
 };
 
