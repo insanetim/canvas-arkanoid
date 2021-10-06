@@ -27,6 +27,7 @@ const game = {
   init() {
     this.ctx = document.getElementById("mycanvas").getContext("2d");
     this.setEvents();
+    this.setTextFont();
   },
   setEvents() {
     window.addEventListener("keydown", ({ keyCode }) => {
@@ -40,6 +41,10 @@ const game = {
       this.platform.stop();
     });
   },
+  setTextFont() {
+    this.ctx.font = "20px Arial";
+    this.ctx.fillStyle = "#FFFFFF";
+  },
   preload(callback) {
     let loaded = 0;
     let required = Object.keys(this.sprites).length;
@@ -51,21 +56,21 @@ const game = {
         callback();
       }
     };
-    
+
     this.preloadSprites(onResourceLoad);
     this.preloadAudio(onResourceLoad);
   },
-  preloadSprites(event) {
+  preloadSprites(listener) {
     for (let key in this.sprites) {
       this.sprites[key] = new Image();
       this.sprites[key].src = `img/${key}.png`;
-      this.sprites[key].addEventListener("load", event);
+      this.sprites[key].addEventListener("load", listener);
     }
   },
-  preloadAudio(event) {
+  preloadAudio(listener) {
     for (let key in this.sounds) {
       this.sounds[key] = new Audio(`sounds/${key}.mp3`);
-      this.sounds[key].addEventListener("canplaythrough", event, {
+      this.sounds[key].addEventListener("canplaythrough", listener, {
         once: true,
       });
     }
@@ -126,7 +131,7 @@ const game = {
     this.ctx.drawImage(this.sprites.background, 0, 0);
     this.ctx.drawImage(
       this.sprites.ball,
-      0,
+      this.ball.frame * this.ball.width,
       0,
       this.ball.width,
       this.ball.height,
@@ -137,6 +142,7 @@ const game = {
     );
     this.ctx.drawImage(this.sprites.platform, this.platform.x, this.platform.y);
     this.renderBlocks();
+    this.ctx.fillText(`Score: ${this.score}`, 15, 20);
   },
   renderBlocks() {
     for (let block of this.blocks) {
@@ -170,9 +176,19 @@ game.ball = {
   y: 280,
   width: 20,
   height: 20,
+  frame: 0,
   start() {
     this.dy = -this.velocity;
     this.dx = game.random(-this.velocity, this.velocity);
+    this.animate();
+  },
+  animate() {
+    setInterval(() => {
+      ++this.frame;
+      if (this.frame > 3) {
+        this.frame = 0;
+      }
+    }, 100);
   },
   move() {
     if (this.dy) {
